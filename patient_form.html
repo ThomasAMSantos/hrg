@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Paciente - HRGURUPI</title>
+    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css"> <!-- Link para o seu arquivo CSS personalizado -->
+    <style>
+        /* Estilo para formatar o dropdown da Escala IMS */
+        .ims-select-option {
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0.5rem 0.75rem;
+        }
+        .ims-select-option:hover {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .ims-select-option span.definition {
+            font-size: 0.75rem; /* text-xs */
+            color: #6b7280; /* text-gray-500 */
+            padding-left: 0.5rem;
+        }
+        /* Estilos de impressão para esconder botões e menus */
+        @media print {
+            header, button, .flex > a {
+                display: none !important;
+            }
+            .bg-gray-100 {
+                background-color: white !important;
+            }
+            /* Remove bordas de inputs e caixas de justifiativa na impressão */
+            input, textarea, select {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            /* Garante que o conteúdo seja legível */
+            .p-8 {
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">HRGURUPI - Gerenciar Paciente</h1>
+            <div class="flex space-x-3">
+                <!-- Adicionado id="printBtn" aqui -->
+                <button id="printBtn" onclick="imprimirDocumento()"
+                        class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out">
+                    Imprimir Documento
+                </button>
+                <button onclick="window.location.href='dashboard.html'"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out">
+                    Voltar ao Dashboard
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            <h2 id="formTitle" class="text-2xl font-bold text-gray-800 mb-6 text-center">Novo Paciente</h2>
+
+            <form id="patientForm" class="space-y-6">
+                <!-- Seção 1: Dados Básicos do Paciente -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
+                    <div class="md:col-span-3"><h3 class="text-lg font-semibold text-gray-700 mb-3">1. Dados do Paciente</h3></div>
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nome:</label>
+                        <input type="text" id="name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="prontuario" class="block text-sm font-medium text-gray-700">Prontuário:</label>
+                        <input type="text" id="prontuario" name="prontuario" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="idade" class="block text-sm font-medium text-gray-700">Idade:</label>
+                        <input type="number" id="idade" name="idade" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="leito" class="block text-sm font-medium text-gray-700">Leito:</label>
+                        <input type="text" id="leito" name="leito" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="data" class="block text-sm font-medium text-gray-700">Data:</label>
+                        <input type="date" id="data" name="data" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label for="diagnostico" class="block text-sm font-medium text-gray-700">1. Diagnóstico:</label>
+                        <textarea id="diagnostico" name="diagnostico" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                    </div>
+                    <div class="md:col-span-3">
+                        <label for="intercorrencias24h" class="block text-sm font-medium text-gray-700">2. Intercorrências nas Últimas 24 Horas:</label>
+                        <textarea id="intercorrencias24h" name="intercorrencias24h" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                    </div>
+                    <div class="md:col-span-3">
+                        <label for="pendenciasExames" class="block text-sm font-medium text-gray-700">3. Pendências de Exames e/ou Avaliação de Especialistas:</label>
+                        <textarea id="pendenciasExames" name="pendenciasExames" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Seção 4: Eventos Adversos -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">4. Eventos Adversos</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">4.1 Evento Adverso (<24h):</label>
+                        <input type="radio" id="eventoAdversoSim" name="eventoAdverso" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="eventoAdversoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="eventoAdversoNao" name="eventoAdverso" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="eventoAdversoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">4.2 Notificado:</label>
+                        <input type="radio" id="eventoAdversoNotificadoSim" name="eventoAdversoNotificado" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="eventoAdversoNotificadoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="eventoAdversoNotificadoNao" name="eventoAdversoNotificado" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="eventoAdversoNotificadoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div class="ml-6 space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Tipos de Evento Adverso:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="queda" name="tipoEventoAdverso" value="QUEDA" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="queda" class="ml-2 text-sm font-medium text-gray-700">QUEDA</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="broncoaspiracao" name="tipoEventoAdverso" value="BRONCOASPIRAÇÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="broncoaspiracao" class="ml-2 text-sm font-medium text-gray-700">BRONCOASPIRAÇÃO</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="flebite" name="tipoEventoAdverso" value="FLEBITE" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="flebite" class="ml-2 text-sm font-medium text-gray-700">FLEBITE</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="perdaDispositivo" name="tipoEventoAdverso" value="PERDA DE DISPOSITIVO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="perdaDispositivo" class="ml-2 text-sm font-medium text-gray-700">PERDA DE DISPOSITIVO</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção 5: Conforto/Analgesia/Delirium -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">5. Conforto/Analgesia/Delirium</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center space-x-4">
+                            <label class="block text-sm font-medium text-gray-700">5.1 Sedação:</label>
+                            <input type="radio" id="sedacaoSim" name="sedacao" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="sedacaoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                            <input type="radio" id="sedacaoNao" name="sedacao" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="sedacaoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="block text-sm font-medium text-gray-700">5.2 Despertar Diário:</label>
+                            <input type="radio" id="despertarDiarioSim" name="despertarDiario" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="despertarDiarioSim" class="text-sm font-medium text-gray-700">SIM</label>
+                            <input type="radio" id="despertarDiarioNao" name="despertarDiario" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="despertarDiarioNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="block text-sm font-medium text-gray-700">5.3 RASS:</label>
+                            <input type="radio" id="rass0a2" name="rass" value="0A-2" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="rass0a2" class="text-sm font-medium text-gray-700">0A-2 (No Alvo)</label>
+                            <input type="radio" id="rassForaDoAlvo" name="rass" value="FORA DO ALVO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="rassForaDoAlvo" class="text-sm font-medium text-gray-700">FORA DO ALVO</label>
+                        </div>
+                        <!-- CAMPO ADICIONADO: Justificativa RASS Fora do Alvo -->
+                        <div id="rassForaDoAlvoMotivoGroup" class="hidden md:col-span-2 mt-2 p-2 bg-red-50 rounded-md border border-red-200">
+                            <label for="rassForaDoAlvoMotivo" class="block text-sm font-bold text-red-700">JUSTIFICATIVA PARA RASS FORA DO ALVO:</label>
+                            <textarea id="rassForaDoAlvoMotivo" name="rassForaDoAlvoMotivo" rows="1" placeholder="Descreva o motivo pelo qual o RASS está fora do alvo (ex: sedação profunda, agitação)." class="mt-1 block w-full border border-red-300 rounded-md shadow-sm p-2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção 6: Protocolo de Dor -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">6. Protocolo de Dor</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">6.1 Adequado:</label>
+                        <input type="radio" id="protocoloDorAdequadoSim" name="protocoloDorAdequado" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="protocoloDorAdequadoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="protocoloDorAdequadoNao" name="protocoloDorAdequado" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="protocoloDorAdequadoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="protocoloDorAdequadoMotivoNaoGroup" class="hidden ml-6 mb-2">
+                        <label for="protocoloDorAdequadoMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
+                        <input type="text" id="protocoloDorAdequadoMotivoNao" name="protocoloDorAdequadoMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">6.2 Delirium nas Últimas 24h:</label>
+                        <input type="radio" id="delirium24hSim" name="delirium24h" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="delirium24hSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="delirium24hNao" name="delirium24h" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="delirium24hNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="block text-sm font-medium text-gray-700">6.3 Pensamento Desorganizado, Inatenção, Alteração do Nível de Consciência e Caráter Flutuante:</label>
+                        <input type="radio" id="pensamentoDesorganizadoSim" name="pensamentoDesorganizado" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="pensamentoDesorganizadoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="pensamentoDesorganizadoNao" name="pensamentoDesorganizado" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="pensamentoDesorganizadoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                </div>
+
+                <!-- Seção 7: Lesões -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">7. Lesões</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">7.1 Lesões por Pressão:</label>
+                        <input type="radio" id="lesoesPorPressaoSim" name="lesoesPorPressao" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="lesoesPorPressaoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="lesoesPorPressaoNao" name="lesoesPorPressao" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="lesoesPorPressaoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="lesoesPorPressaoLocalGroup" class="hidden ml-6 mb-2">
+                        <label for="lesoesPorPressaoLocal" class="block text-sm font-medium text-gray-700">SE SIM, LOCAL:</label>
+                        <input type="text" id="lesoesPorPressaoLocal" name="lesoesPorPressaoLocal" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">7.2 Outras:</label>
+                        <input type="radio" id="outrasLesoesSim" name="outrasLesoesCheck" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="outrasLesoesSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="outrasLesoesNao" name="outrasLesoesCheck" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="outrasLesoesNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="outrasLesoesInputGroup" class="hidden ml-6 mb-2">
+                        <label for="outrasLesoes" class="block text-sm font-medium text-gray-700">Descreva Outras Lesões:</label>
+                        <textarea id="outrasLesoes" name="outrasLesoes" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Seção 8: Infecção -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">8. Infecção</h3>
+                    
+                    <!-- Pergunta "Há possibilidade de retirada de dispositivos?" era a que estava circulada e foi removida por ser redundante. -->
+                    
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">8.1 CVC:</label>
+                        <input type="radio" id="cvcSim" name="cvc" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="cvcSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="cvcNao" name="cvc" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="cvcNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="cvcMotivoNaoGroup" class="hidden ml-6 mb-2">
+                        <label for="cvcMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
+                        <input type="text" id="cvcMotivoNao" name="cvcMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">8.2 SVD:</label>
+                        <input type="radio" id="svdSim" name="svd" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="svdSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="svdNao" name="svd" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="svdNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="svdMotivoNaoGroup" class="hidden ml-6 mb-2">
+                        <label for="svdMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
+                        <input type="text" id="svdMotivoNao" name="svdMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                </div>
+
+                <!-- Seção 9: Fisioterapia -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">9. Fisioterapia</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">9.1 IOT nas Últimas 24h:</label>
+                        <input type="radio" id="iot24hSim" name="iot24h" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="iot24hSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="iot24hNao" name="iot24h" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="iot24hNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">9.2 Foi Avaliada a Possibilidade de VNI para Evitar a IOT?</label>
+                        <input type="radio" id="avaliadaVNIEvitarIOTSim" name="avaliadaVNIEvitarIOT" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="avaliadaVNIEvitarIOTSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="avaliadaVNIEvitarIOTNao" name="avaliadaVNIEvitarIOT" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="avaliadaVNIEvitarIOTNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="vniEvitarIotMotivoNaoGroup" class="hidden ml-6 mb-2">
+                        <label for="vniEvitarIotMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
+                        <input type="text" id="vniEvitarIotMotivoNao" name="vniEvitarIotMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">9.3 Ventilação Espontânea:</label>
+                        <input type="radio" id="ventilacaoEspontaneaSim" name="ventilacaoEspontanea" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="ventilacaoEspontaneaSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="ventilacaoEspontaneaNao" name="ventilacaoEspontanea" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="ventilacaoEspontaneaNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="ventilacaoEspontaneaDetails" class="hidden ml-6 space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">SE SIM:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="aa" name="ventilacaoEspontaneaTipo" value="AA" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="aa" class="ml-2 text-sm font-medium text-gray-700">AA</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="vni" name="ventilacaoEspontaneaTipo" value="VNI" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="vni" class="ml-2 text-sm font-medium text-gray-700">VNI</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="o2" name="ventilacaoEspontaneaTipo" value="O2" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="o2" class="ml-2 text-sm font-medium text-gray-700">O2</label>
+                            </div>
+                        </div>
+                        <label for="ventilacaoEspontaneaO2LMin" class="block text-sm font-medium text-gray-700">O2-L/MIN:</label>
+                        <input type="text" id="ventilacaoEspontaneaO2LMin" name="ventilacaoEspontaneaO2LMin" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">9.4 Ventilação Mecânica Invasiva:</label>
+                        <input type="radio" id="ventilacaoMecanicaInvasivaSim" name="ventilacaoMecanicaInvasiva" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="ventilacaoMecanicaInvasivaSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="ventilacaoMecanicaInvasivaNao" name="ventilacaoMecanicaInvasiva" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="ventilacaoMecanicaInvasivaNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="ventilacaoMecanicaInvasivaDetails" class="hidden ml-6 space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">SE SIM:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="tot" name="ventilacaoMecanicaInvasivaTipo" value="TOT" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="tot" class="ml-2 text-sm font-medium text-gray-700">TOT</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="tqt" name="ventilacaoMecanicaInvasivaTipo" value="TQT" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="tqt" class="ml-2 text-sm font-medium text-gray-700">TQT</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">9.5 Desmame da Ventilação Mecânica:</label>
+                        <input type="radio" id="desmameVMSim" name="desmameVM" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="desmameVMSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="desmameVMNao" name="desmameVM" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="desmameVMNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="desmameVMMotivoNaoGroup" class="hidden ml-6 mb-2">
+                        <label for="desmameVMMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
+                        <input type="text" id="desmameVMMotivoNao" name="desmameVMMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">9.6 Realizado TRE:</label>
+                        <input type="radio" id="realizadoTRESim" name="realizadoTRE" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="realizadoTRESim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="realizadoTRENao" name="realizadoTRE" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="realizadoTRENao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="realizadoTREMotivoNaoGroup" class="hidden ml-6 mb-2">
+                        <label for="realizadoTREMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
+                        <input type="text" id="realizadoTREMotivoNao" name="realizadoTREMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">9.7 Apto à Extubação:</label>
+                        <input type="radio" id="aptoExtubacaoSim" name="aptoExtubacao" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="aptoExtubacaoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="aptoExtubacaoNao" name="aptoExtubacao" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="aptoExtubacaoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="aptoExtubacaoMotivoInaptoGroup" class="hidden ml-6 mb-2">
+                        <label for="aptoExtubacaoMotivoInapto" class="block text-sm font-medium text-gray-700">SE INAPTO, MOTIVO:</label>
+                        <input type="text" id="aptoExtubacaoMotivoInapto" name="aptoExtubacaoMotivoInapto" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+
+                    <!-- CAMPO ATUALIZADO: 9.8 Escala IMS com dropdown completo e definição -->
+                    <div>
+                        <label for="escalaIMS" class="block text-sm font-medium text-gray-700">9.8 Escala IMS:</label>
+                        <select id="escalaIMS" name="escalaIMS" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Selecione a classificação IMS</option>
+                            <option value="0 - Sem mobilização">0 - Sem mobilização (Paciente no leito, não realiza nenhuma atividade)</option>
+                            <option value="1 - Sentado no leito, exercícios no leito">1 - Sentado no leito, exercícios no leito (Capaz de sentar-se ativamente ou exercitado passivamente)</option>
+                            <option value="2 - Transferido passivamente para a cadeira (sentado)">2 - Transferido passivamente para a cadeira (sentado) (Requer assistência)</option>
+                            <option value="3 - Sentado à beira do leito">3 - Sentado à beira do leito (Capaz de se manter sentado sem auxílio, mas pode requerer assistência para chegar à beira)</option>
+                            <option value="4 - Ortoestatismo">4 - Ortoestatismo (Pode requerer suporte ou assistência para a transição)</option>
+                            <option value="5 - Transferência do leito para cadeira">5 - Transferência do leito para cadeira (Geralmente requer ajuda mínima)</option>
+                            <option value="6 - Marcha estacionária (à beira do leito)">6 - Marcha estacionária (à beira do leito) (Marchar no lugar, apoio nas grades do leito)</option>
+                            <option value="7 - Deambular com auxílio de 2 ou mais pessoas">7 - Deambular com auxílio de 2 ou mais pessoas</option>
+                            <option value="8 - Deambular com auxílio de 1 pessoa">8 - Deambular com auxílio de 1 pessoa</option>
+                            <option value="9 - Deambulação independente com auxílio de um dispositivo de marcha">9 - Deambulação independente com auxílio de um dispositivo de marcha (Ex: andador, bengala)</option>
+                            <option value="10 - Deambulação independente sem auxílio de um dispositivo de marcha">10 - Deambulação independente sem auxílio de um dispositivo de marcha (Capaz de andar sem ajuda)</option>
+                        </select>
+                    </div>
+
+                    <!-- CAMPO ATUALIZADO: 9.9 Meta de Mobilização (Campo aberto) -->
+                    <div class="md:col-span-3">
+                        <label for="metaMobilizacaoLivre" class="block text-sm font-medium text-gray-700">9.9 Meta de Mobilização (Descrição Livre):</label>
+                        <textarea id="metaMobilizacaoLivre" name="metaMobilizacaoLivre" rows="2" placeholder="Ex: Deambulação no quarto 2x/dia. Meta: Sentar à beira do leito por 30 minutos." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Seção 10: Profilaxias -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">10. Profilaxias</h3>
+                    <div class="mb-2">
+                        <label class="block text-sm font-medium text-gray-700">FOWLER:</label>
+                        <div class="flex flex-wrap gap-4 mt-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="fowler30" name="fowler" value="30°" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="fowler30" class="ml-2 text-sm font-medium text-gray-700">30°</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="fowler60" name="fowler" value="60°" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="fowler60" class="ml-2 text-sm font-medium text-gray-700">60°</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="fowler90" name="fowler" value="90°" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <label for="fowler90" class="ml-2 text-sm font-medium text-gray-700">90°</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center space-x-4">
+                            <label class="block text-sm font-medium text-gray-700">10.1 TEV:</label>
+                            <input type="radio" id="tevSim" name="tev" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="tevSim" class="text-sm font-medium text-gray-700">SIM</label>
+                            <input type="radio" id="tevNao" name="tev" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="tevNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="block text-sm font-medium text-gray-700">10.2 Úlcera Gástrica:</label>
+                            <input type="radio" id="ulceraGastricaSim" name="ulceraGastrica" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="ulceraGastricaSim" class="text-sm font-medium text-gray-700">SIM</label>
+                            <input type="radio" id="ulceraGastricaNao" name="ulceraGastrica" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="ulceraGastricaNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="block text-sm font-medium text-gray-700">10.3 Lesão por Pressão:</label>
+                            <input type="radio" id="lesaoPorPressaoSim" name="lesaoPorPressao" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="lesaoPorPressaoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                            <input type="radio" id="lesaoPorPressaoNao" name="lesaoPorPressao" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="lesaoPorPressaoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <label class="block text-sm font-medium text-gray-700">10.4 Temperatura Corporal Adequada:</label>
+                            <input type="radio" id="temperaturaCorporalAdequadaSim" name="temperaturaCorporalAdequada" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="temperaturaCorporalAdequadaSim" class="text-sm font-medium text-gray-700">SIM</label>
+                            <input type="radio" id="temperaturaCorporalAdequadaNao" name="temperaturaCorporalAdequada" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label for="temperaturaCorporalAdequadaNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção 11: Nutrição -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">11. Nutrição</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">11.1 Meta Nutricional Adequada:</label>
+                        <input type="radio" id="metaNutricionalAdequadaSim" name="metaNutricionalAdequada" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="metaNutricionalAdequadaSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="metaNutricionalAdequadaNao" name="metaNutricionalAdequada" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="metaNutricionalAdequadaNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <label class="block text-sm font-medium text-gray-700">11.2 Aporte Proteico:</label>
+                        <input type="radio" id="aporteProteicoSim" name="aporteProteico" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="aporteProteicoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="aporteProteicoNao" name="aporteProteico" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="aporteProteicoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                </div>
+
+                <!-- Seção 12: Farmácia -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">12. Farmácia</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">12.1 Algum medicamento pode ser passado para VO?</label>
+                        <input type="radio" id="medicamentoVOSim" name="medicamentoVO" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="medicamentoVOSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="medicamentoVONao" name="medicamentoVO" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="medicamentoVONao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="medicamentoVOSimQualGroup" class="hidden ml-6 mb-2">
+                        <label for="medicamentoVOSimQual" class="block text-sm font-medium text-gray-700">SE SIM, QUAL?</label>
+                        <input type="text" id="medicamentoVOSimQual" name="medicamentoVOSimQual" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <label class="block text-sm font-medium text-gray-700">12.2 Algum medicamento pode ser suspenso?</label>
+                        <input type="radio" id="medicamentoSuspensoSim" name="medicamentoSuspenso" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="medicamentoSuspensoSim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="medicamentoSuspensoNao" name="medicamentoSuspenso" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="medicamentoSuspensoNao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="medicamentoSuspensoSimQualGroup" class="hidden ml-6 mb-2">
+                        <label for="medicamentoSuspensoSimQual" class="block text-sm font-medium text-gray-700">SE SIM, QUAL?</label>
+                        <input type="text" id="medicamentoSuspensoSimQual" name="medicamentoSuspensoSimQual" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                </div>
+
+                <!-- Seção 13: Plano do Dia -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">13. Plano do Dia</h3>
+                    <div>
+                        <textarea id="planoDoDia" name="planoDoDia" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Seção 14: Previsão de Alta da UTI -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">14. Previsão de Alta da UTI</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <input type="radio" id="previsaoAltaUTISim" name="previsaoAltaUTI" value="SIM" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="previsaoAltaUTISim" class="text-sm font-medium text-gray-700">SIM</label>
+                        <input type="radio" id="previsaoAltaUTINao" name="previsaoAltaUTI" value="NÃO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="previsaoAltaUTINao" class="text-sm font-medium text-gray-700">NÃO</label>
+                    </div>
+                    <div id="previsaoAltaUTISetorDestinoGroup" class="hidden ml-6 mb-2">
+                        <label for="previsaoAltaUTISetorDestino" class="block text-sm font-medium text-gray-700">SETOR DE DESTINO:</label>
+                        <input type="text" id="previsaoAltaUTISetorDestino" name="previsaoAltaUTISetorDestino" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                </div>
+
+                <!-- Assinaturas (apenas texto, para fins de demonstração) -->
+                <div class="border-b pb-4 mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Assinaturas (Apenas para Referência)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <p class="text-sm text-gray-600">MÉDICO</p>
+                        <p class="text-sm text-gray-600">ENFERMEIRO</p>
+                        <p class="text-sm text-gray-600">FISIOTERAPEUTA</p>
+                        <p class="text-sm text-gray-600">NUTRICIONISTA</p>
+                        <p class="text-sm text-gray-600">PSICÓLOGO(A)</p>
+                        <p class="text-sm text-gray-600">ODONTÓLOGO</p>
+                        <p class="text-sm text-gray-600">FARMACÊUTICO</p>
+                        <p class="text-sm text-gray-600">TÉC. ENFERMAGEM</p>
+                        <p class="text-sm text-gray-600">FONOAUDIÓLOGO</p>
+                    </div>
+                </div>
+
+                <button type="submit" id="savePatientBtn"
+                        class="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                    Salvar Paciente
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Script principal para a lógica do site -->
+    <script src="js/script.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HRGURUPI</title>
+    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css"> <!-- Link para o seu arquivo CSS personalizado -->
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <div class="text-center mb-6">
+            <!-- Imagem de placeholder para o logo do HRGURUPI -->
+            <img src="https://placehold.co/150x75/E2E8F0/64748B?text=HRGURUPI" alt="HRGURUPI Logo" class="mx-auto mb-4 rounded-md">
+            <h2 class="text-2xl font-bold text-gray-800">Visita Multidisciplinar UTI Adulto</h2>
+            <p class="text-gray-600 text-sm mt-1">Acesso para Profissionais de Saúde</p>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label for="identification" class="block text-sm font-medium text-gray-700 mb-1">Número de Identificação:</label>
+                <input type="text" id="identification" name="identification" required
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-gray-400"
+                       placeholder="Ex: CRM12345, COREN67890">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha:</label>
+                <input type="password" id="password" name="password" required
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-gray-400"
+                       placeholder="Sua senha">
+            </div>
+
+            <div>
+                <label for="profession" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Profissional:</label>
+                <select id="profession" name="profession" required
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white">
+                    <option value="">Selecione seu tipo de profissional</option>
+                    <option value="medico">Médico</option>
+                    <option value="enfermeiro">Enfermeiro</option>
+                    <option value="fisioterapeuta">Fisioterapeuta</option>
+                    <option value="odontologo">Odontólogo</option>
+                    <option value="nutricionista">Nutricionista</option>
+                    <option value="psicologo">Psicólogo</option>
+                    <option value="farmaceutico">Farmacêutico</option>
+                    <option value="tecnico_enfermagem">Técnico de Enfermagem</option>
+                    <option value="fonoaudiologo">Fonoaudiólogo</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+
+            <button type="submit"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                Entrar
+            </button>
+
+            <p id="errorMessage" class="text-red-600 text-sm text-center mt-4"></p>
+        </form>
+    </div>
+
+    <!-- Script principal para a lógica do site -->
+    <script src="js/script.js"></script>
+</body>
+</html>
+
