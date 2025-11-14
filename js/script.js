@@ -4,7 +4,7 @@
 let loggedInUser = null; // Armazena o usuário logado
 const USERS = [
     { id: 'CRM123', password: '123', profession: 'medico', name: 'Dr. João Silva' },
-    { id: 'COREN456', password: '123', profession: 'enfermeiro', name: 'Enf. Maria Souza' },
+    { id: 'RQE3882', password: '123', profession: 'medico', name: 'Dra. Ana Laura Gonçalves Resende' },
     { id: 'CREFITO789', password: '123', profession: 'fisioterapeuta', name: 'Fisio. Ana Costa' },
     { id: 'CRN101', password: '123', profession: 'nutricionista', name: 'Nutri. Carlos Pereira' },
     { id: 'CRP202', password: '123', profession: 'psicologo', name: 'Psic. Laura Mendes' },
