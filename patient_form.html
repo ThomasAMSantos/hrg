@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Paciente - HRGURUPI</title>
-    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/style.css"> <!-- Link para o seu arquivo CSS personalizado -->
-    <style>
+    <link rel="stylesheet" href="css/style.css"> <style>
         /* Estilo para formatar o dropdown da Escala IMS */
         .ims-select-option {
             font-size: 0.875rem; /* text-sm */
@@ -25,25 +23,186 @@
             color: #6b7280; /* text-gray-500 */
             padding-left: 0.5rem;
         }
-        /* Estilos de impressão para esconder botões e menus */
+        
+        /* === ESTILOS DE IMPRESSÃO (LAYOUT DO PDF) === */
+        
+        /* Oculta o layout de impressão na tela */
+        #print-container {
+            display: none;
+        }
+
         @media print {
-            header, button, .flex > a {
+            /* 1. Oculta a interface original inteira */
+            header, main {
                 display: none !important;
             }
-            .bg-gray-100 {
-                background-color: white !important;
+
+            /* 2. Mostra o container de impressão */
+            #print-container {
+                display: block !important;
             }
-            /* Remove bordas de inputs e caixas de justifiativa na impressão */
-            input, textarea, select {
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
+
+            /* 3. Estilos da Página e do Conteúdo Injetado */
+            @page {
+                size: A4;
+                margin: 0.7cm;
             }
-            /* Garante que o conteúdo seja legível */
-            .p-8 {
-                padding: 0 !important;
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 9pt;
+                color: black;
+            }
+            
+            .print-page {
+                display: block;
+                width: 100%;
+            }
+
+            /* Cabeçalho (Logos) */
+            .print-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                border-bottom: 2px solid black;
+                padding-bottom: 8px;
+                margin-bottom: 8px;
+            }
+            .print-header .logo-left { font-size: 8pt; line-height: 1.2; }
+            .print-header .logo-right { text-align: right; font-size: 8pt; line-height: 1.2; font-weight: bold;}
+            
+            .print-title {
+                text-align: center;
+                font-weight: bold;
+                font-size: 11pt;
+                margin-bottom: 10px;
+            }
+            
+            /* Informações do Paciente (Grid) */
+            .print-patient-info {
+                display: grid;
+                grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+                gap: 4px;
+                margin-bottom: 8px;
+            }
+            .print-item {
+                border: 1px solid #999;
+                padding: 3px;
+                /* Permite quebra de conteúdo */
+                overflow: hidden;
+                word-wrap: break-word;
+            }
+            .print-item label {
+                font-weight: bold;
+                display: block;
+                font-size: 7pt;
+                text-transform: uppercase;
+                margin-bottom: 1px;
+                color: #333;
+            }
+            
+            /* Seções (Diagnóstico, etc.) */
+            .print-section {
+                border-top: 1px solid black;
+                margin-top: 10px;
+                padding-top: 4px;
+                page-break-inside: avoid; /* Tenta não quebrar a seção no meio */
+            }
+            .print-section-title {
+                font-weight: bold;
+                font-size: 10pt;
+                margin-bottom: 4px;
+            }
+            
+            .print-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* 2 colunas */
+                gap: 2px 8px; /* Espaçamento linha / coluna */
+            }
+            
+            /* Itens de linha */
+            .print-line-item {
+                display: block;
+                margin-bottom: 2px;
+            }
+            .print-line-item-long {
+                grid-column: 1 / -1; /* Ocupa as duas colunas */
+            }
+            
+            /* Checkbox/Radio (X) SIM () NÃO */
+            .check {
+                font-family: 'Courier New', Courier, monospace;
+                font-weight: bold;
+                font-size: 10pt;
+                margin: 0 3px;
+                display: inline-block;
+                width: 15px; /* Alinhamento */
+                text-align: center;
+            }
+            .check-label {
+                margin-left: 10px;
+                font-weight: bold;
+            }
+
+            /* Campos de Texto (Motivos, Plano do Dia) */
+            .print-motivo, .print-plano {
+                white-space: pre-wrap; /* Mantém a quebra de linha */
+                word-wrap: break-word; /* Quebra palavras longas */
+                padding: 2px;
+                min-height: 1.2em;
+                font-size: 9pt;
+            }
+            /* Adiciona uma "linha" pontilhada para motivos */
+            .print-motivo {
+                border: 1px dotted #999;
+                margin-top: 2px;
+            }
+            
+            /* Assinaturas */
+            /* Assinaturas */
+            /* Assinaturas (Centralizado para 1) */
+            .print-assinaturas {
+                /* Removido o grid de 3 colunas */
+                /* display: grid; */
+                /* grid-template-columns: 1fr 1fr 1fr; */
+                /* gap: 15px 10px; */
+
+                /* Adicionado para centralizar */
+                display: block;
+                max-width: 40%; /* Define a largura do bloco da assinatura (pode ajustar) */
+                margin: 15px auto 0 auto; /* Centraliza o bloco na página */
+
+                margin-top: 15px;
+                border-top: 1px solid black;
+                padding-top: 8px;
+            }
+            .print-assinatura-item {
+                font-size: 8pt;
+                border-top: 1px solid #333; /* Linha para assinar */
+                padding-top: 3px;
+                text-align: center;
+                text-transform: uppercase;
+                min-height: 3em; /* Garante altura mínima */
+            }
+
+            /* Estilo para a assinatura preenchida (Digital) */
+            .print-assinatura-item.signed {
+                border-top: none; /* Remove a linha de assinar */
+                padding-top: 10px; /* Adiciona espaço superior */
+                font-size: 9pt;
+                text-transform: none;
+                font-weight: normal;
+                line-height: 1.4;
+            }
+            .print-assinatura-item.signed .sig-name {
+                font-weight: bold;
+            }
+            .print-assinatura-item.signed .sig-id {
+                font-size: 8pt;
+                color: #333;
+                text-transform: uppercase;
             }
         }
+        /* === FIM DOS ESTILOS DE IMPRESSÃO === */
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -51,7 +210,6 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">HRGURUPI - Gerenciar Paciente</h1>
             <div class="flex space-x-3">
-                <!-- Adicionado id="printBtn" aqui -->
                 <button id="printBtn" onclick="imprimirDocumento()"
                         class="bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out">
                     Imprimir Documento
@@ -69,7 +227,6 @@
             <h2 id="formTitle" class="text-2xl font-bold text-gray-800 mb-6 text-center">Novo Paciente</h2>
 
             <form id="patientForm" class="space-y-6">
-                <!-- Seção 1: Dados Básicos do Paciente -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4 mb-4">
                     <div class="md:col-span-3"><h3 class="text-lg font-semibold text-gray-700 mb-3">1. Dados do Paciente</h3></div>
                     <div>
@@ -106,7 +263,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 4: Eventos Adversos -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">4. Eventos Adversos</h3>
                     <div class="flex items-center space-x-4 mb-2">
@@ -146,7 +302,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 5: Conforto/Analgesia/Delirium -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">5. Conforto/Analgesia/Delirium</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -171,15 +326,13 @@
                             <input type="radio" id="rassForaDoAlvo" name="rass" value="FORA DO ALVO" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
                             <label for="rassForaDoAlvo" class="text-sm font-medium text-gray-700">FORA DO ALVO</label>
                         </div>
-                        <!-- CAMPO ADICIONADO: Justificativa RASS Fora do Alvo -->
                         <div id="rassForaDoAlvoMotivoGroup" class="hidden md:col-span-2 mt-2 p-2 bg-red-50 rounded-md border border-red-200">
                             <label for="rassForaDoAlvoMotivo" class="block text-sm font-bold text-red-700">JUSTIFICATIVA PARA RASS FORA DO ALVO:</label>
-                            <textarea id="rassForaDoAlvoMotivo" name="rassForaDoAlvoMotivo" rows="1" placeholder="Descreva o motivo pelo qual o RASS está fora do alvo (ex: sedação profunda, agitação)." class="mt-1 block w-full border border-red-300 rounded-md shadow-sm p-2"></textarea>
+                            <textarea id="rassForaDoAlvoMotivo" name="rassForaDoAlvoMotivo" rows="2" placeholder="Descreva o motivo pelo qual o RASS está fora do alvo (ex: sedação profunda, agitação)." class="mt-1 block w-full border border-red-300 rounded-md shadow-sm p-2"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Seção 6: Protocolo de Dor -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">6. Protocolo de Dor</h3>
                     <div class="flex items-center space-x-4 mb-2">
@@ -191,7 +344,7 @@
                     </div>
                     <div id="protocoloDorAdequadoMotivoNaoGroup" class="hidden ml-6 mb-2">
                         <label for="protocoloDorAdequadoMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
-                        <input type="text" id="protocoloDorAdequadoMotivoNao" name="protocoloDorAdequadoMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="protocoloDorAdequadoMotivoNao" name="protocoloDorAdequadoMotivoNao" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                     <div class="flex items-center space-x-4 mb-2">
                         <label class="block text-sm font-medium text-gray-700">6.2 Delirium nas Últimas 24h:</label>
@@ -209,7 +362,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 7: Lesões -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">7. Lesões</h3>
                     <div class="flex items-center space-x-4 mb-2">
@@ -221,7 +373,7 @@
                     </div>
                     <div id="lesoesPorPressaoLocalGroup" class="hidden ml-6 mb-2">
                         <label for="lesoesPorPressaoLocal" class="block text-sm font-medium text-gray-700">SE SIM, LOCAL:</label>
-                        <input type="text" id="lesoesPorPressaoLocal" name="lesoesPorPressaoLocal" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="lesoesPorPressaoLocal" name="lesoesPorPressaoLocal" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                     <div class="flex items-center space-x-4 mb-2">
                         <label class="block text-sm font-medium text-gray-700">7.2 Outras:</label>
@@ -236,11 +388,8 @@
                     </div>
                 </div>
 
-                <!-- Seção 8: Infecção -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">8. Infecção</h3>
-                    
-                    <!-- Pergunta "Há possibilidade de retirada de dispositivos?" era a que estava circulada e foi removida por ser redundante. -->
                     
                     <div class="flex items-center space-x-4 mb-2">
                         <label class="block text-sm font-medium text-gray-700">8.1 CVC:</label>
@@ -251,7 +400,7 @@
                     </div>
                     <div id="cvcMotivoNaoGroup" class="hidden ml-6 mb-2">
                         <label for="cvcMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
-                        <input type="text" id="cvcMotivoNao" name="cvcMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="cvcMotivoNao" name="cvcMotivoNao" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                     <div class="flex items-center space-x-4 mb-2">
                         <label class="block text-sm font-medium text-gray-700">8.2 SVD:</label>
@@ -262,11 +411,10 @@
                     </div>
                     <div id="svdMotivoNaoGroup" class="hidden ml-6 mb-2">
                         <label for="svdMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
-                        <input type="text" id="svdMotivoNao" name="svdMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="svdMotivoNao" name="svdMotivoNao" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                 </div>
 
-                <!-- Seção 9: Fisioterapia -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">9. Fisioterapia</h3>
                     <div class="flex items-center space-x-4 mb-2">
@@ -285,7 +433,7 @@
                     </div>
                     <div id="vniEvitarIotMotivoNaoGroup" class="hidden ml-6 mb-2">
                         <label for="vniEvitarIotMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
-                        <input type="text" id="vniEvitarIotMotivoNao" name="vniEvitarIotMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="vniEvitarIotMotivoNao" name="vniEvitarIotMotivoNao" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                     <div class="flex items-center space-x-4 mb-2">
                         <label class="block text-sm font-medium text-gray-700">9.3 Ventilação Espontânea:</label>
@@ -344,7 +492,7 @@
                     </div>
                     <div id="desmameVMMotivoNaoGroup" class="hidden ml-6 mb-2">
                         <label for="desmameVMMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
-                        <input type="text" id="desmameVMMotivoNao" name="desmameVMMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="desmameVMMotivoNao" name="desmameVMMotivoNao" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
 
                     <div class="flex items-center space-x-4 mb-2">
@@ -356,7 +504,7 @@
                     </div>
                     <div id="realizadoTREMotivoNaoGroup" class="hidden ml-6 mb-2">
                         <label for="realizadoTREMotivoNao" class="block text-sm font-medium text-gray-700">SE NÃO, MOTIVO:</label>
-                        <input type="text" id="realizadoTREMotivoNao" name="realizadoTREMotivoNao" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="realizadoTREMotivoNao" name="realizadoTREMotivoNao" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
 
                     <div class="flex items-center space-x-4 mb-2">
@@ -368,10 +516,9 @@
                     </div>
                     <div id="aptoExtubacaoMotivoInaptoGroup" class="hidden ml-6 mb-2">
                         <label for="aptoExtubacaoMotivoInapto" class="block text-sm font-medium text-gray-700">SE INAPTO, MOTIVO:</label>
-                        <input type="text" id="aptoExtubacaoMotivoInapto" name="aptoExtubacaoMotivoInapto" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="aptoExtubacaoMotivoInapto" name="aptoExtubacaoMotivoInapto" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
 
-                    <!-- CAMPO ATUALIZADO: 9.8 Escala IMS com dropdown completo e definição -->
                     <div>
                         <label for="escalaIMS" class="block text-sm font-medium text-gray-700">9.8 Escala IMS:</label>
                         <select id="escalaIMS" name="escalaIMS" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
@@ -390,14 +537,12 @@
                         </select>
                     </div>
 
-                    <!-- CAMPO ATUALIZADO: 9.9 Meta de Mobilização (Campo aberto) -->
                     <div class="md:col-span-3">
                         <label for="metaMobilizacaoLivre" class="block text-sm font-medium text-gray-700">9.9 Meta de Mobilização (Descrição Livre):</label>
                         <textarea id="metaMobilizacaoLivre" name="metaMobilizacaoLivre" rows="2" placeholder="Ex: Deambulação no quarto 2x/dia. Meta: Sentar à beira do leito por 30 minutos." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                 </div>
 
-                <!-- Seção 10: Profilaxias -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">10. Profilaxias</h3>
                     <div class="mb-2">
@@ -449,7 +594,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 11: Nutrição -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">11. Nutrição</h3>
                     <div class="flex items-center space-x-4 mb-2">
@@ -468,7 +612,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 12: Farmácia -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">12. Farmácia</h3>
                     <div class="flex items-center space-x-4 mb-2">
@@ -480,7 +623,7 @@
                     </div>
                     <div id="medicamentoVOSimQualGroup" class="hidden ml-6 mb-2">
                         <label for="medicamentoVOSimQual" class="block text-sm font-medium text-gray-700">SE SIM, QUAL?</label>
-                        <input type="text" id="medicamentoVOSimQual" name="medicamentoVOSimQual" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="medicamentoVOSimQual" name="medicamentoVOSimQual" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                     <div class="flex items-center space-x-4 mb-2">
                         <label class="block text-sm font-medium text-gray-700">12.2 Algum medicamento pode ser suspenso?</label>
@@ -491,11 +634,10 @@
                     </div>
                     <div id="medicamentoSuspensoSimQualGroup" class="hidden ml-6 mb-2">
                         <label for="medicamentoSuspensoSimQual" class="block text-sm font-medium text-gray-700">SE SIM, QUAL?</label>
-                        <input type="text" id="medicamentoSuspensoSimQual" name="medicamentoSuspensoSimQual" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="medicamentoSuspensoSimQual" name="medicamentoSuspensoSimQual" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                 </div>
 
-                <!-- Seção 13: Plano do Dia -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">13. Plano do Dia</h3>
                     <div>
@@ -503,7 +645,6 @@
                     </div>
                 </div>
 
-                <!-- Seção 14: Previsão de Alta da UTI -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">14. Previsão de Alta da UTI</h3>
                     <div class="flex items-center space-x-4 mb-2">
@@ -514,23 +655,15 @@
                     </div>
                     <div id="previsaoAltaUTISetorDestinoGroup" class="hidden ml-6 mb-2">
                         <label for="previsaoAltaUTISetorDestino" class="block text-sm font-medium text-gray-700">SETOR DE DESTINO:</label>
-                        <input type="text" id="previsaoAltaUTISetorDestino" name="previsaoAltaUTISetorDestino" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <textarea id="previsaoAltaUTISetorDestino" name="previsaoAltaUTISetorDestino" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                     </div>
                 </div>
 
-                <!-- Assinaturas (apenas texto, para fins de demonstração) -->
                 <div class="border-b pb-4 mb-4">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">Assinaturas (Apenas para Referência)</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <p class="text-sm text-gray-600">MÉDICO</p>
-                        <p class="text-sm text-gray-600">ENFERMEIRO</p>
-                        <p class="text-sm text-gray-600">FISIOTERAPEUTA</p>
-                        <p class="text-sm text-gray-600">NUTRICIONISTA</p>
-                        <p class="text-sm text-gray-600">PSICÓLOGO(A)</p>
-                        <p class="text-sm text-gray-600">ODONTÓLOGO</p>
-                        <p class="text-sm text-gray-600">FARMACÊUTICO</p>
-                        <p class="text-sm text-gray-600">TÉC. ENFERMAGEM</p>
-                        <p class="text-sm text-gray-600">FONOAUDIÓLOGO</p>
+                        
                     </div>
                 </div>
 
@@ -542,8 +675,6 @@
         </div>
     </main>
 
-    <!-- Script principal para a lógica do site -->
     <script src="js/script.js"></script>
 </body>
 </html>
-
